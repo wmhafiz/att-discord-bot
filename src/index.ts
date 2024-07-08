@@ -1,13 +1,16 @@
 import { Client } from 'discord.js'
 import { deployCommands } from './deploy-commands'
-import { config } from './config'
+import { discordConfig } from './config'
 import { commands } from './commands'
+import { attBot } from './att-client'
 
 const client = new Client({
     intents: ['Guilds', 'GuildMessages', 'DirectMessages'],
 })
 
-client.once('ready', () => {
+client.once('ready', async () => {
+    console.log('starting bot..')
+    await attBot.start()
     console.log('Discord bot is ready! 🤖')
 })
 
@@ -25,4 +28,4 @@ client.on('interactionCreate', async (interaction) => {
     }
 })
 
-client.login(config.DISCORD_TOKEN)
+client.login(discordConfig.DISCORD_TOKEN)

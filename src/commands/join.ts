@@ -1,4 +1,30 @@
 import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { attBot } from '../att-client'
+import { attConfig } from '../config'
+
+export async function getUserIdFromUsername(username: string) {
+    console.log(`looking userid for ${username}`)
+    const response = await attBot.api.request(
+        'POST',
+        '/users/search/username',
+        {},
+        {},
+        {
+            username,
+        }
+    )
+    const result = await response.json()
+    return result.id ? Number(result.id) : null
+}
+
+export async function invitePlayerToGroup(groupId: number, userId: number) {
+    const response = await attBot.api.request(
+        'POST',
+        '/groups/{groupId}/invites/{userId}',
+        { groupId, userId }
+    )
+    return await response.json()
+}
 
 export const data = new SlashCommandBuilder()
     .setName('join')
@@ -11,13 +37,23 @@ export const data = new SlashCommandBuilder()
     )
 
 export async function execute(interaction: CommandInteraction) {
-    console.log(JSON.stringify(interaction.options.data, null, 2))
-    const usernameOption = interaction.options.data.find(
+    const userIdOption = interaction.options.data.find(
         (opt) => opt.name === 'username'
     )
-    const username = usernameOption?.value
+    const username = String(userIdOption?.value)
     if (!username) {
         return interaction.reply('Please provide a username!')
     }
-    return interaction.reply(`Sent an invite to ${username}!`)
+    try {
+        const userId = await getUserIdFromUsername(username)
+        if (!userId) {
+            return interaction.reply(`No user found: ${userId}!`)
+        }
+        const groupId = attConfig.groupId
+        await invitePlayerToGroup(groupId, userId)
+        return interaction.reply(`Sent an invite to ${username} (${userId})!`)
+    } catch (err) {
+        console.error(err)
+        return interaction.reply(`No user found: ${username}!`)
+    }
 }
