@@ -5,6 +5,11 @@ import {
     EmbedBuilder,
 } from 'discord.js'
 import { discordConfig } from '../config'
+import {
+    getChannelName,
+    getEmployeeRoleName,
+    getLeaderRoleName,
+} from '../utils'
 
 export const data = new SlashCommandBuilder()
     .setName('org')
@@ -74,9 +79,9 @@ const createChannel = async (
     }
 
     // Define the role names internally
-    const channelName = name.toLowerCase().replace(' ', '-').replace("'", '')
-    const leaderRoleName = `${channelName}-leader`
-    const employeeRoleName = `${channelName}-employees`
+    const channelName = getChannelName(name)
+    const leaderRoleName = getLeaderRoleName(channelName)
+    const employeeRoleName = getEmployeeRoleName(channelName)
 
     // Send request to the same channel
     const embed = new EmbedBuilder()
