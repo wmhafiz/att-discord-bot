@@ -1,11 +1,22 @@
-import { Client } from 'discord.js'
+import {
+    ChannelType,
+    Client,
+    CommandInteraction,
+    GatewayIntentBits,
+} from 'discord.js'
 import { deployCommands } from './deploy-commands'
 import { discordConfig } from './config'
 import { commands } from './commands'
 import { attBot } from './att-client'
+import { processCreateOrg } from './reactions'
 
 const client = new Client({
-    intents: ['Guilds', 'GuildMessages', 'DirectMessages'],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMessageReactions,
+    ],
 })
 
 client.once('ready', async () => {
@@ -19,13 +30,17 @@ client.on('guildCreate', async (guild) => {
 })
 
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isCommand()) {
+    if (interaction.isChatInputCommand() || interaction.isCommand()) {
+        const { commandName } = interaction
+        if (commands[commandName as keyof typeof commands]) {
+            commands[commandName as keyof typeof commands].execute(interaction)
+        }
         return
     }
-    const { commandName } = interaction
-    if (commands[commandName as keyof typeof commands]) {
-        commands[commandName as keyof typeof commands].execute(interaction)
-    }
+})
+
+client.on('messageReactionAdd', async (reaction, user) => {
+    await processCreateOrg(reaction, user)
 })
 
 client.login(discordConfig.DISCORD_TOKEN)

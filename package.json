@@ -5,6 +5,7 @@
     "main": "dist/Bot.js",
     "scripts": {
         "dev": "tsx watch src/index.ts",
+        "updateCmd": "tsx src/update-commands.ts",
         "start": "node dist/index.js",
         "build": "tsup src/index.ts --minify"
     },

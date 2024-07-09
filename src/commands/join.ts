@@ -37,10 +37,8 @@ export const data = new SlashCommandBuilder()
     )
 
 export async function execute(interaction: CommandInteraction) {
-    const userIdOption = interaction.options.data.find(
-        (opt) => opt.name === 'username'
-    )
-    const username = String(userIdOption?.value)
+    const usernameOption = interaction.options.get('username')
+    const username = String(usernameOption?.value)
     if (!username) {
         return interaction.reply('Please provide a username!')
     }
